@@ -1,0 +1,27 @@
+body {
+  background: black;
+}
+
+#app {
+  margin: 24px auto;
+  width: max-content;
+  font-family: trebuchet ms, arial;
+  text-align: center;
+  color: white;
+}
+
+h1 {
+  margin: auto;
+}
+
+#settings-box {
+  display: flex;
+}
+
+#batch-size, #run-function {
+  display: block;
+  margin: 12px 6px;
+  flex: 1;
+  font-size: 24px;
+  text-align: center;
+}
