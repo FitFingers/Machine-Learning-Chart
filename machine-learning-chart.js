@@ -1,15 +1,19 @@
 const GRAPH = document.getElementById("graph"),
-      GRAPH_X = GRAPH.getAttribute("width")/2,
-      GRAPH_Y = GRAPH.getAttribute("height")/2,
+      GRAPH_X = GRAPH.getAttribute("width"),
+      GRAPH_Y = GRAPH.getAttribute("height"),
       RANDOM_WEIGHTS = {
         x: randomNumber(-1, 1),
-        y: randomNumber(-1, 1)
+        y: randomNumber(-1, 1),
+        offset: randomNumber(-1, 1) * GRAPH_X
       };
 
 // If this was live, I would store the trainedWeights variable on the server-side so that it would always improve through user input and not restart every time the page refreshes. I don't know yet how I would deal with converging multiple user's data.
 let trainedWeights = RANDOM_WEIGHTS,
     batchSize = 200,
-    count = 0;
+    count = 0,
+    graphType = "x-is-y",
+    summary = [];
+
 
 
 // First, we have to generate an array of any length. This will be our data set, so the more data, the more accurate our AI will be. We need to set the elements in this array to equal random co-ordinates, so we can use the function randomNumber to generate these (as well as converting them to fit correctly into the graph) and return to each element an object.
@@ -17,47 +21,88 @@ function randomNumber(low, high) {
   return Math.random() * (high - low) + low;
 }
 
-function generateDataRange(high) {
-  // high = parseInt(high);
-  const RANGE = [...Array(parseInt(high)).keys()].map(p =>{
+function generateDataRange(limit) {
+  const RANGE = [...Array(parseInt(limit)).keys()].map(p =>{
     return {
-      x: randomNumber(-1, 1) * GRAPH_X + GRAPH_X,
-      y: randomNumber(-1, 1) * GRAPH_Y + GRAPH_Y
+      x: randomNumber(-1, 1) * GRAPH_X/2 + GRAPH_X/2,
+      y: randomNumber(-1, 1) * GRAPH_Y/2 + GRAPH_Y/2
     }});
   return RANGE;
 }
 
-function getTeam(p) {
-  return p.x > p.y ? 1 : -1;
+function updateGraphType(e) {
+  graphType = e.target.id;
+  trainedWeights = RANDOM_WEIGHTS;
+  count = 0;
+  plotLine(graphType);
+}
+
+function plotLine(type) {
+  [...GRAPH.getElementsByClassName("bisector")].map(l => l.parentNode.removeChild(l));
+  type === "x-is-minus-y" ?
+    renderLine(10, GRAPH_X-10, 10, GRAPH_Y-10) :
+  type === "x-is-y" ?
+    renderLine(10, GRAPH_X-10, GRAPH_Y-10, 10) :
+  type === "x-is-y-sq" ?
+    console.log("x = y²") : console.log("y = x²");
+}
+
+function renderLine(x1, x2, y1, y2) {
+  const LINE = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  LINE.setAttribute("x1", x1);
+  LINE.setAttribute("x2", x2);
+  LINE.setAttribute("y1", y1);
+  LINE.setAttribute("y2", y2);
+  LINE.setAttribute("stroke", "green");
+  LINE.classList.add("bisector");
+  GRAPH.appendChild(LINE);
+}
+
+// Could be useful to have the object carry this information inside of it rather than calling it in the case that I need the result.
+function correctAnswer(p) {
+  return graphType === "x-is-minus-y" ?
+    p.x > p.y ? 1 : -1 :
+  p.x + p.y > 800 ? 1 : -1;
+}
+
+function getOffset() {
+  return graphType === "x-is-minus-y" ? 0 : 800;
 }
 
 // This is where we need to start using our RANDOM_WEIGHTS that we defined in the runFunction function. This is essentially the AI's initial bias toward something and it is totally random, but by training it with data and incrementing its bias/weight toward a certain result, it can learn and basically script its own algorithm to identify the correct outcome.
-// The first part, takeGuess, will use the given weights (first time is random, after that is is always improving) to determine whether a point ought to be red or blue, which it returns as either 1 or -1. The trainOnce function then compares that to the correct team, and assigns the value of either 0 or -2 to ERROR. When the TRAINED_WEIGHTS object is declared, it 
-function trainOnce(weights, point, team) {
-  const RESULT = takeGuess(weights, point),
-        ERROR = team - RESULT,
-        LEARNING_RATE = count < batchSize*10 ? 0.1 : count < batchSize*2.5 ? 0.03 : 0.005,
+// The first part, takeGuess, will use the given weights (first time is random, after that is is always improving) to determine whether a point ought to be red or blue, which it returns as either 1 or -1. The trainOnce function then compares that to the correct team, and assigns the value of either 0 or -2 to ERROR. When the TRAINED_WEIGHTS object is declared, it adjusts the previous weights accordingly; these will then be passed into the next iteration to be honed further.
+function trainOnce(weights, point, correct) {
+  const GUESS = takeGuess(weights, point),
+        ERROR = correct - GUESS,
+        LEARNING_RATE = count < 2 ?
+        0.01 : count < 4 ?
+        0.001 : count < 6 ?
+        0.0005 : count < 8 ?
+        0.0002 : 0.00005,
+        // This declaration keeps the weights the same when they map a point correctly, and alters them slightly when they map badly:
+        // I would love to figure out how to remove the getOffset function. Giving the AI a clear 0 or 800 number depending on its situation feels like cheating but I can't figure out how to balance it to work for both graphs.
         TRAINED_WEIGHTS = {
           x: weights.x + (point.x * ERROR * LEARNING_RATE),
-          y: weights.y + (point.y * ERROR * LEARNING_RATE)
+          y: weights.y + (point.y * ERROR * LEARNING_RATE),
+          offset: weights.offset - (getOffset() * ERROR * LEARNING_RATE)
         };
   return TRAINED_WEIGHTS;
 }
 
 function takeGuess(weights, point) {
   const SUM =
-        weights.x * point.x +
-        weights.y * point.y;
-  const TEAM = SUM > 0 ? 1 : -1;
-  return TEAM;
+        (weights.x * point.x) +
+        (weights.y * point.y) - weights.offset;
+  const GUESS = SUM > 0 ? 1 : -1;
+  return GUESS;
 }
 
 function trainRange(data, weights, getCorrect, render) {
   for (let i = 0; i < data.length; i++) {
     trainedWeights = trainOnce(trainedWeights, data[i], getCorrect(data[i]));
-    // render([data[i]], trainedWeights);      // << HERE HAS A FEW STRAYS BUT IS *ALWAYS* ON THE CORRECT LINE
+    render([data[i]], trainedWeights);      // << HERE HAS A FEW STRAYS BUT IS *ALWAYS* ON THE CORRECT LINE. IT IS MUCH BETTER FOR TROUBLESHOOTING OTHER GRAPH TANGENTS.
   }
-  render(data, trainedWeights);       // << HERE WE HAVE NO STRAYS BUT SOMETIMES DEVIATE SUBSTANTIALLY FROM THE LINE. render IS A CALLBACK SO I CAN REUSE THIS FUNCTION ELSEWHERE.
+  // render(data, trainedWeights);       // << HERE WE HAVE NO STRAYS BUT SOMETIMES DEVIATE SUBSTANTIALLY FROM THE LINE. render IS A CALLBACK SO I CAN REUSE THIS FUNCTION ELSEWHERE.
 }
 
 function renderData(data, weights) {
@@ -72,26 +117,73 @@ function renderData(data, weights) {
   });
 }
 
-// Using a count and batchSize variable, we can filter down the learning rate as the results get more reliable so as to fine-tune the AI.
-function runFunction() {
-  batchSize = document.getElementById("batch-size").value || 200;
-  [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
-  const DATA = generateDataRange(batchSize);
-  trainRange(DATA, trainedWeights, getTeam, renderData);
-  count += batchSize;
+// This simply logs how many of the points are incorrectly placed. Average is around 0.5% with large batches (b > 200)
+function checkSuccess(batchSize) {
+  const TOF = [...document.getElementsByTagName("circle")].map(c => {
+    const C = {
+      x: parseFloat(c.getAttribute("cx")),
+      y: parseFloat(c.getAttribute("cy"))
+    };
+    const CORR_COL = correctAnswer(C) === 1 ? "red" : "blue";
+    return CORR_COL === c.getAttribute("fill");
+  });
+  FALSIES = TOF.filter(elem => elem === false).length;
+  return {
+    iteration: count,
+    score: FALSIES,
+    batchSize: batchSize,
+    totalPoints: batchSize*count
+  };
 }
 
+// This function simply logs the results into the summary array, which I will later use to convey the AI's learning curve through another graph.
+function logResults(i) {
+  if (i["score"] <= 0.055 && i["iteration"] <= 100) {
+    console.log(`Success at ${i["iteration"]} with ${i["score"]}/${i["batchSize"]} fails.`);
+    summary.push(i);
+    count = 0;
+    trainedWeights = RANDOM_WEIGHTS;
+    return;
+  } else if (i["iteration"] <= 100) {
+    runFunction();
+  } else {
+    console.log("Failure.")
+    count = 0;
+    trainedWeights = RANDOM_WEIGHTS;
+  }
+}
+
+// Using a count variable, I will scale down the learning rate as the results get more precise so as to fine-tune the AI.
+function runFunction() {
+  batchSize = document.getElementById("batch-size").value || 50;
+  [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
+  plotLine(graphType);
+  const DATA = generateDataRange(batchSize);
+  trainRange(DATA, trainedWeights, correctAnswer, renderData);
+  count++;
+
+  const ITERATION = checkSuccess(batchSize);
+  logResults(ITERATION);
+}
+
+// NEXT FEATURE: Make the runFunction function wait 25ms every iteration so that the data can be shown moving on screen.
+
+// NEXT FEATURE: Give the user a learning-rate display and input box (maybe use [...args] where each arg = [learning-rate, count] so as to keep the sliding scale).
+
+// NEXT FEATURE: Design a graph which uses the objects stored in array "summary" and plots them to a graph to visualise the entire process.
 
 
 
 
 
+
+[...document.getElementsByClassName("goal-button")].map(b => b.addEventListener("click", updateGraphType));
+[...document.getElementsByClassName("unfinished")].map(b => b.addEventListener("click", () => alert("Pfft, you know how difficult the other graphs were?!")));
+document.getElementById("batch-size").addEventListener("input", () => console.log("boo!"));
 document.getElementById("run-function").addEventListener("click", runFunction);
 window.addEventListener("keypress", (e) => { if (e.keyCode == 13) { runFunction() }});
 
 
 
-window.onload = () => {
-  runFunction();
-}
+window.onload = () => runFunction();
 
