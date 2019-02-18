@@ -11,7 +11,51 @@ body {
 }
 
 h1 {
+  margin: auto;body {
+  background: black;
+}
+
+#app {
+  margin: 24px auto;
+  width: max-content;
+  font-family: trebuchet ms, arial;
+  text-align: center;
+  color: white;
+}
+
+h1 {
   margin: auto;
+}
+
+svg {
+  background: lightblue;
+}
+
+#settings-box {
+  display: flex;
+}
+
+#batch-size, #run-function {
+  display: block;
+  margin: 12px 6px;
+  flex: 1;
+  font-size: 24px;
+  text-align: center;
+}
+
+#goal-box {
+  display: flex;
+  margin: 12px 6px;
+  width: auto;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.goal-button {
+  width: 40%;
+  margin: 8px;
+  font-size: 18px;
+}
 }
 
 #settings-box {
