@@ -22,6 +22,8 @@
 }
 
 .clickable {
+  background: #3F4045;
+  color: #FCFCFC;
   transition: transform 120ms, box-shadow 150ms;
 }
 
@@ -56,6 +58,7 @@ body header #title h2 {
   font-size: 14px;
 }
 body header #right-header {
+  position: relative;
   flex: 1.618;
 }
 body header #right-header a {
@@ -72,12 +75,71 @@ body header #right-header a #james-hooper-logo {
   width: 140px;
   height: 70px;
 }
+body header #right-header #help-button {
+  background: none;
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  border-radius: 50%;
+}
 body #main-container {
   background: #3F4045;
   display: flex;
   padding: 16px;
   border-radius: 10px;
   box-shadow: 0 4px 20px 4px rgba(0, 0, 0, 0.8);
+}
+body .popup-panel, body #summary-display, body #help-display {
+  background: rgba(255, 255, 255, 0.3);
+  position: fixed;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+body .panel, body #summary-display #summary-graph-box, body #help-display #help-box {
+  border-radius: 5px;
+  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
+  background: #5D737E;
+  position: relative;
+  padding: 24px;
+}
+body .close-button, body #summary-display #summary-graph-box #summary-close, body #help-display #help-box #help-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+body .close-button i, body #summary-display #summary-graph-box #summary-close i, body #help-display #help-box #help-close i {
+  border-radius: 50%;
+}
+body #summary-display #summary-graph-box #summary-graph {
+  border-radius: 5px;
+  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
+  background: #FCFCFC;
+  width: 60vw;
+  min-width: 500px;
+  max-height: 300px;
+  max-width: 850px;
+}
+body #summary-display #summary-graph-box ul {
+  display: block;
+  margin-left: -48px;
+  list-style: none;
+}
+body #summary-display #summary-graph-box ul li {
+  display: inline-block;
+  margin: auto 16px;
+}
+body #help-display #help-box #help-text {
+  max-width: 60vw;
+  max-height: 80vh;
+  overflow: scroll;
+}
+body #help-display #help-box #help-text p {
+  font-size: 12px;
 }
 body #settings-box {
   border-radius: 5px;
@@ -93,10 +155,6 @@ body #settings-box .option {
   margin-top: 12px;
   margin-bottom: 12px;
 }
-body #settings-box h3 {
-  margin: 8px auto;
-  color: #FCFCFC;
-}
 body #settings-box .option-box {
   display: grid;
   grid-gap: 6px;
@@ -104,11 +162,31 @@ body #settings-box .option-box {
   margin: auto;
   width: 100%;
 }
+body #settings-box h3 {
+  margin: 5px auto;
+  color: #FCFCFC;
+}
 body #settings-box #batch-options {
-  grid-template-rows: 1fr 1fr;
+  grid-template-areas: "heading heading heading" "batch iteration reset-rate";
+}
+body #settings-box #batch-options .heading {
+  grid-area: heading;
+  width: 100%;
+}
+body #settings-box #batch-options .batch {
+  grid-area: batch;
+  width: 100%;
+}
+body #settings-box #batch-options .iteration {
+  grid-area: iteration;
+  width: 100%;
+}
+body #settings-box #batch-options .reset-rate {
+  grid-area: reset-rate;
+  width: 100%;
 }
 body #settings-box #learning-rate-options {
-  grid-template-areas: "heading heading" "new-rate new-step" "curr-rate curr-step";
+  grid-template-areas: "heading heading heading" "new-rate new-step set-rate";
 }
 body #settings-box #learning-rate-options .heading {
   grid-area: heading;
@@ -122,12 +200,23 @@ body #settings-box #learning-rate-options .new-step {
   grid-area: new-step;
   width: 100%;
 }
-body #settings-box #learning-rate-options .curr-rate {
-  grid-area: curr-rate;
+body #settings-box #learning-rate-options .set-rate {
+  grid-area: set-rate;
   width: 100%;
 }
-body #settings-box #learning-rate-options .curr-step {
-  grid-area: curr-step;
+body #settings-box #loop-end-options {
+  grid-template-areas: "heading heading" "new-rate toggle";
+}
+body #settings-box #loop-end-options .heading {
+  grid-area: heading;
+  width: 100%;
+}
+body #settings-box #loop-end-options .new-rate {
+  grid-area: new-rate;
+  width: 100%;
+}
+body #settings-box #loop-end-options .toggle {
+  grid-area: toggle;
   width: 100%;
 }
 body #settings-box #speed-options {
@@ -176,7 +265,7 @@ body #settings-box #results-box .heading {
   width: 100%;
   align-self: center;
 }
-body #settings-box #results-box .input, body #settings-box #results-box .large-input, body #settings-box #results-box .settings-span {
+body #settings-box #results-box .input, body #settings-box #results-box .large-input {
   grid-area: input;
   width: 100%;
   align-self: center;
@@ -186,22 +275,24 @@ body #settings-box #results-box .icon {
   width: 100%;
   align-self: center;
 }
-body #settings-box .input, body #settings-box .large-input, body #settings-box .settings-span {
-  flex: 1;
-  font-size: 18px;
+body #settings-box .input, body #settings-box .large-input {
+  font-size: 16px;
   text-align: center;
+  color: #3F4045;
 }
 body #settings-box .large-input {
   margin-top: 12px;
   margin-bottom: 12px;
+  max-width: 100%;
 }
 body #settings-box .settings-span {
   border-radius: 5px;
   box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
   display: inline-block;
-  background: #3F4045;
   padding: 2px 10px;
   min-width: 100%;
+  font-size: 16px;
+  text-align: center;
 }
 body #settings-box .icon {
   border-radius: 5px;
@@ -212,9 +303,16 @@ body #settings-box .icon {
 body #settings-box .icon:hover {
   transform: scale(1.13);
 }
+body #settings-box .toggleOn {
+  background: #008000;
+}
 body #settings-box #run-function {
   margin-top: 48px;
+  margin-bottom: 12px;
   height: 48px;
+  font-size: 18px;
+  text-align: center;
+  color: #FCFCFC;
 }
 body #settings-box #hint {
   font-size: 12px;
