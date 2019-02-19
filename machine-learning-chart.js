@@ -1,6 +1,6 @@
-const GRAPH = document.getElementById("graph"),
-      GRAPH_X = GRAPH.getAttribute("width"),
-      GRAPH_Y = GRAPH.getAttribute("height"),
+const GRAPH = document.getElementById("main-graph"),
+      GRAPH_X = 600,
+      GRAPH_Y = 600,
       RANDOM_WEIGHTS = {
         x: randomNumber(-1, 1),
         y: randomNumber(-1, 1),
@@ -12,9 +12,14 @@ let trainedWeights = RANDOM_WEIGHTS,
     batchSize = 200,
     count = 0,
     graphType = "x-is-y",
+    interval = -50,
     summary = [];
 
 
+function setGraphSize() {
+  GRAPH.style.width = "100%";
+  GRAPH.style.height = document.getElementById("graph-box").offsetWidth;
+}
 
 // First, we have to generate an array of any length. This will be our data set, so the more data, the more accurate our AI will be. We need to set the elements in this array to equal random co-ordinates, so we can use the function randomNumber to generate these (as well as converting them to fit correctly into the graph) and return to each element an object.
 function randomNumber(low, high) {
@@ -30,10 +35,13 @@ function generateDataRange(limit) {
   return RANGE;
 }
 
+function setInterval() {
+  interval = event.target.value;
+}
+
 function updateGraphType(e) {
   graphType = e.target.id;
-  trainedWeights = RANDOM_WEIGHTS;
-  count = 0;
+  resetVars();
   plotLine(graphType);
 }
 
@@ -62,11 +70,11 @@ function renderLine(x1, x2, y1, y2) {
 function correctAnswer(p) {
   return graphType === "x-is-minus-y" ?
     p.x > p.y ? 1 : -1 :
-  p.x + p.y > 800 ? 1 : -1;
+  p.x + p.y > GRAPH_X ? 1 : -1;
 }
 
 function getOffset() {
-  return graphType === "x-is-minus-y" ? 0 : 800;
+  return graphType === "x-is-minus-y" ? 0 : GRAPH_X;
 }
 
 // This is where we need to start using our RANDOM_WEIGHTS that we defined in the runFunction function. This is essentially the AI's initial bias toward something and it is totally random, but by training it with data and incrementing its bias/weight toward a certain result, it can learn and basically script its own algorithm to identify the correct outcome.
@@ -130,8 +138,8 @@ function checkSuccess(batchSize) {
   FALSIES = TOF.filter(elem => elem === false).length;
   return {
     iteration: count,
-    score: FALSIES,
-    batchSize: batchSize,
+    score: FALSIES,                     // BUG!: score is always 0 for some reason.
+    batchSize: parseInt(batchSize),
     totalPoints: batchSize*count
   };
 }
@@ -141,20 +149,31 @@ function logResults(i) {
   if (i["score"] <= 0.055 && i["iteration"] <= 100) {
     console.log(`Success at ${i["iteration"]} with ${i["score"]}/${i["batchSize"]} fails.`);
     summary.push(i);
-    count = 0;
-    trainedWeights = RANDOM_WEIGHTS;
+    resetVars();
+    renderLastResult();
     return;
   } else if (i["iteration"] <= 100) {
-    runFunction();
+    setTimeout(runFunction, interval);
   } else {
     console.log("Failure.")
-    count = 0;
-    trainedWeights = RANDOM_WEIGHTS;
+    summary.push[i];
+    resetVars();
+    renderLastResult();
   }
+}
+
+function resetVars() {
+  count = 0;
+  trainedWeights = RANDOM_WEIGHTS;
+}
+
+function renderLastResult() {
+  document.getElementById("result-display").value = JSON.stringify(summary[summary.length-1]);
 }
 
 // Using a count variable, I will scale down the learning rate as the results get more precise so as to fine-tune the AI.
 function runFunction() {
+  setGraphSize();
   batchSize = document.getElementById("batch-size").value || 50;
   [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
   plotLine(graphType);
@@ -166,24 +185,29 @@ function runFunction() {
   logResults(ITERATION);
 }
 
-// NEXT FEATURE: Make the runFunction function wait 25ms every iteration so that the data can be shown moving on screen.
+
 
 // NEXT FEATURE: Give the user a learning-rate display and input box (maybe use [...args] where each arg = [learning-rate, count] so as to keep the sliding scale).
 
 // NEXT FEATURE: Design a graph which uses the objects stored in array "summary" and plots them to a graph to visualise the entire process.
 
+// NEXT FEATURE: Add options to change the maximum iteration count.
+
+// NEXT FEATURE: Function to choose whether to reset weights on win/failure or keep training this data.
+
+// NEXT FEATURE: Customise colours function.
 
 
 
 
 
-[...document.getElementsByClassName("goal-button")].map(b => b.addEventListener("click", updateGraphType));
+
+[...document.getElementsByClassName("graph-button")].map(b => b.addEventListener("click", updateGraphType));
 [...document.getElementsByClassName("unfinished")].map(b => b.addEventListener("click", () => alert("Pfft, you know how difficult the other graphs were?!")));
-document.getElementById("batch-size").addEventListener("input", () => console.log("boo!"));
+document.getElementById("new-speed").addEventListener("input", setInterval);
+document.getElementById("batch-size").addEventListener("input", resetVars);
 document.getElementById("run-function").addEventListener("click", runFunction);
+
 window.addEventListener("keypress", (e) => { if (e.keyCode == 13) { runFunction() }});
-
-
-
+window.onresize = () => setGraphSize();
 window.onload = () => runFunction();
-
