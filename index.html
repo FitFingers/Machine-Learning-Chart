@@ -33,6 +33,7 @@
           <a href="https://fitfingers.github.io/" target="_blank">
             <div id="james-hooper-logo"></div>
           </a>
+          <i id="help-button" class="fas fa-question-circle clickable help-toggle"></i>
         </div>
       </header>
 
@@ -40,21 +41,99 @@
 
       <main id="main-container">
 
+        <div id="summary-display">
+          <div id="summary-graph-box">
+            <div id="summary-close" class="summary-toggle">
+              <i class="fas fa-times-circle clickable"></i>
+            </div>
+            <svg id="summary-graph" viewbox="0 0 700 300"></svg>
+            <ul>
+              <li><label for="batch-size"><input type="checkbox" for="batch-size" disabled>Batch size</label></li>
+              <li><label for="score"><input type="checkbox" for="score" disabled>Score (%)</label></li>
+              <li><label for="iteration"><input type="checkbox" for="iteration" checked>Iteration</label></li>
+              <li><label for="total-points"><input type="checkbox" for="total-points" checked>Total points</label></li>
+            </ul>
+          </div>
+        </div>
+
+        <div id="help-display">
+          <div id="help-box">
+            <div id="help-close" class="help-toggle">
+              <i class="fas fa-times-circle clickable"></i>
+            </div>
+            <div id="help-text">
+              <h4>Batch Size:</h4>
+              <p>The number of co-ordinates plotted per iteration.</p>
+
+              <h4>Max Iterations:</h4>
+              <p>The maximum number of times the AI will run until it gives up.</p>
+
+              <h4>Reset:</h4>
+              <p>Regenerate a new set of random weights (biases) to use. Each experiment will begin with the same random weights until you press this button, allowing you to test numerous setups with the same starting point.</p>
+
+              <h4>Rate:</h4>
+              <p>A comma-separated list to setup your own learning rate. The AI will use these numbers to refine its results (lower is more precise).</p>
+
+              <h4>Step:</h4>
+              <p>A comma-separated list to setup your own learning rate. These steps dictate after how many (total) iterations the AI will use the following learning rate.</p>
+
+              <h4>Apply:</h4>
+              <p>Submit the Learning Rate inputs.</p>
+
+              <h4>Accuracy:</h4>
+              <p>The desired success rate. When the AI renders this many or more co-ordinates correctly, the function will end.</p>
+
+              <h4>Forget/Learn:</h4>
+              <p>Forget: Each time the function ends, the variables will be reset or "forgotten". Use this to see how the AI functions within your given parameters.</p>
+              <p>Learn: The AI will remember the previous run and will continue to improve upon it. Compare this against the random nature of "Forget" to see how the AI really learns.</p>
+
+              <h4>Frame Duration:</h4>
+              <p>Set the frame length for the function in milliseconds so you can either skip through or watch how the AI learns step-by-step.</p>
+
+              <h4>Point/Batch:</h4>
+              <p>Point: The AI will render each co-ordinate one-by-one, so the resulting graph will have some strays.</p>
+              <p>Batch: The AI will train on the entire batch before rendering with its current setup, meaning the bisector is consistently, although that doesn't mean it is correct.</p>
+
+              <h4>Graph Types:</h4>
+              <p>Choose from these graphs to see how the AI handles different goals.</p>
+
+              <h4>Result:</h4>
+              <p>The most recent result: displays success after x iterations with y/z mistakes or fail with the percentage of correctly-rendered co-ordinates.</p>
+              
+              <h4>Result Summary:</h4>
+              <p>See your recent results in chart-form here and analyse how each setup affects the AI's abilities.</p>
+              
+              <h4>Run Function:</h4>
+              <p>Run the function with the current setup.</p>
+            </div>
+          </div>
+        </div>
+
         <div id="settings-box">
-          <input id="batch-size" class="large-input input-style" type="number" placeholder="Batch size:" />
+          <div id="batch-options" class="option option-box">
+            <h3 class="heading">Data:</h3>
+            <input id="batch-size" class="input input-style batch" type="number" placeholder="Batch size:" />
+            <input id="max-iterations" class="input input-style iteration" type="number" placeholder="Max iterations:" />
+            <span id="reset-random-weights" class="reset-rate settings-span clickable">Reset</span>
+          </div>
 
           <div id="learning-rate-options" class="option option-box">
             <h3 class="heading">Learning Rate:</h3>
-            <input id="lr-new-rate" class="new-rate input input-style" type="number" placeholder="New Rate" />
-            <input id="lr-new-step" class="new-step input input-style" type="number" placeholder="New Step"/>
-            <span id="lr-curr-rate" class="curr-rate settings-span">0.01</span>
-            <span id="lr-curr-step" class="curr-step settings-span">2</span>
+            <input id="lr-new-rates" class="new-rate input input-style" type="text" placeholder="Rate: 1, 0.1..." />
+            <input id="lr-new-steps" class="new-step input input-style" type="text" placeholder="Step: 2, 4, 6..." />
+            <span id="set-learning-rate" class="set-rate settings-span clickable">Apply</span>
+          </div>
+
+          <div id="loop-end-options" class="option option-box">
+            <h3 class="heading">Loop End:</h3>
+            <input id="accuracy-rate" class="new-rate input input-style" type="number" placeholder="Desired accuracy (in %):" />
+            <span id="weight-reset-toggle" class="toggle settings-span clickable">Forget</span>
           </div>
 
           <div id="speed-options" class="option option-box">
-            <h3 class="heading">Iteration Speed:</h3>
-            <input id="new-speed" class="new-rate input input-style" type="number" placeholder="Frame Duration (ms)"/>
-            <span id="auto-run-toggle" class="toggle settings-span clickable">Run Once</span>
+            <h3 class="heading">Animation Speed:</h3>
+            <input id="new-speed" class="new-rate input input-style" type="number" placeholder="Frame Duration (ms):"/>
+            <span id="point-iteration-toggle" class="toggle settings-span clickable">Point</span>
           </div>
 
           <div id="graph-options" class="option option-box">
@@ -64,34 +143,31 @@
             <button id="x-is-y-sq" class="unfinished graph-button button-style clickable">x = y²</button>
             <button id="y-is-x-sq" class="unfinished graph-button button-style clickable">y = x²</button>
           </div>
-          
+
           <div id="results-box" class="option option-box">
             <h3 class="heading">Result:</h3>
             <input id="result-display" class="input input-style" placeholder="Pending..."/>
-            <i class="clickable icon far fa-chart-bar"></i>
+            <i id="show-summary-button" class="clickable icon summary-toggle far fa-chart-bar"></i>
           </div>
 
-          <button id="run-function" class="large-input button-style clickable">Run Function</button>
+          <button id="run-function" class="button-style clickable">Run Function</button>
+
           <span id="hint">HINT: App runs on "enter".</span>
         </div>
 
-        
-        
+
+
         <div id="graph-box">
-<!--           <svg id="main-graph" width="600" height="600"> -->
-          <svg id="main-graph" viewbox="0 0 600 600">
-            <!--       <line x1="0" x2="800" y1="400" y2="400" stroke="purple" stroke-width="0.5"></line>
-<line x1="400" x2="400" y1="0" y2="800" stroke="purple" stroke-width="0.5"></line> -->
-          </svg>
+          <svg id="main-graph" viewbox="0 0 600 600"></svg>
         </div>
       </main>
 
 
 
     </div>
-    <script src="machine-learning-chart.js" type="text/javascript"></script>
+    <script src="machine-learning-chart.js" type="text/javascript" />
   </body>
 
 
 
-</html>
+    </html>
