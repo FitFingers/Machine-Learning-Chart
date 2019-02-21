@@ -35,6 +35,17 @@
 
 body {
   background: #02111B;
+  margin: 0;
+}
+body #bg {
+  background-image: url(https://i.ibb.co/gyMV00H/hexagon-honeycomb-tessellation-coloring-pages-1.png);
+  background-size: contain;
+  filter: invert(1);
+  opacity: 0.02;
+  position: absolute;
+  min-height: 100vh;
+  min-width: 100vw;
+  z-index: -1;
 }
 body #app {
   margin: auto;
@@ -106,6 +117,7 @@ body .panel, body #summary-display #summary-graph-box, body #help-display #help-
   background: #5D737E;
   position: relative;
   padding: 24px;
+  box-shadow: 0 2px 10px 2px rgba(0, 0, 0, 0.45);
 }
 body .close-button, body #summary-display #summary-graph-box #summary-close, body #help-display #help-box #help-close {
   position: absolute;
@@ -119,10 +131,27 @@ body #summary-display #summary-graph-box #summary-graph {
   border-radius: 5px;
   box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
   background: #FCFCFC;
-  width: 60vw;
   min-width: 500px;
-  max-height: 300px;
-  max-width: 850px;
+  width: 60vw;
+  max-width: 700px;
+}
+body #summary-display #summary-graph-box #summary-graph circle {
+  cursor: pointer;
+}
+body #summary-display #summary-graph-box #summary-graph line {
+  fill: #3F4045;
+}
+body #summary-display #summary-graph-box #summary-graph pre {
+  border-radius: 5px;
+  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
+  background: #3F4045;
+  display: none;
+  padding: 8px 12px;
+  width: min-content;
+  height: min-content;
+  font-size: 14px;
+  color: #FCFCFC;
+  z-index: 1;
 }
 body #summary-display #summary-graph-box ul {
   display: block;
@@ -140,6 +169,15 @@ body #help-display #help-box #help-text {
 }
 body #help-display #help-box #help-text p {
   font-size: 12px;
+}
+body #help-display #help-box #help-text #setup-example {
+  border-radius: 5px;
+  box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
+  background: #FCFCFC;
+  margin-top: 32px;
+  padding: 12px;
+  padding-top: 4px;
+  color: #3F4045;
 }
 body #settings-box {
   border-radius: 5px;
@@ -276,6 +314,7 @@ body #settings-box #results-box .icon {
   align-self: center;
 }
 body #settings-box .input, body #settings-box .large-input {
+  padding-left: 6px;
   font-size: 16px;
   text-align: center;
   color: #3F4045;
@@ -328,4 +367,7 @@ body #graph-box #main-graph {
   float: right;
   height: 600px;
   width: 600px;
+}
+body #graph-box .bisector {
+  opacity: 0.2;
 }
