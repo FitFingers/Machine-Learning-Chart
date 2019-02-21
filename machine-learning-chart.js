@@ -1,19 +1,25 @@
 const GRAPH = document.getElementById("main-graph"),
       GRAPH_X = 600,
-      GRAPH_Y = 600;
+      GRAPH_Y = 600,
+      COLOURS = {
+        maincol: "#5D737E",
+        buttcol: "#3F4045",
+        ctacol: "#008000",
+        errorcol: "#DD7373",
+        // errorcol: "#FE5F55"
+      }
 
-// If this was live, I would store the trainedWeights variable on the server-side so that it would always improve through user input and not restart every time the page refreshes. I don't know yet how I would deal with converging multiple user's data.
 let randomWeights = generateRandomWeights(),
     trainedWeights = randomWeights,
     iterationCount = 0,
     batchSize = 50,
-    maxIterations = 10,
+    maxIterations = 100,
     learningRate = [[2, 0.01], [4, 0.001], [6, 0.0005], [8, 0.0002]],
     learnRateCount = 0,
     accuracyTarget = 99,
     shouldWeightsReset = true,
     interval = 0,
-    shouldRenderAfterPoint = true,
+    shouldRenderAfterPoint = false,
     graphType = "x-is-y",
     isHelpOpen = false,
     isSummaryOpen = false,
@@ -52,9 +58,9 @@ function handleToggleChange(e, isToggleOn) {
       true: "Forget",
       false: "Learn",
     },
-    "point-iteration-toggle": {
-      true: "Point",
-      false: "Batch",
+    "batch-iteration-toggle": {
+      true: "Batch",
+      false: "Point",
     }
   }
   document.getElementById(e).innerHTML = TEXT_VALUES[e][isToggleOn];
@@ -64,22 +70,107 @@ function handleToggleChange(e, isToggleOn) {
   shouldRenderAfterPoint = !shouldRenderAfterPoint;
 }
 
-// I would love to figure out how to make this one "setVariable(var)" function where I pass in the variable as a string and set that variable to equal this.value.
-// Look into eval() and window[var].
-function setBatchSize() {
-  batchSize = parseInt(this.value);
+function toggleHelpDisplay() {
+  isHelpOpen = !isHelpOpen;
+  document.getElementById("help-display").style.display = isHelpOpen === true ? "flex" : "none";
 }
 
-function setMaxIterations() {
-  maxIterations = parseInt(this.value);
+function toggleSummaryDisplay() {
+  isSummaryOpen = !isSummaryOpen;
+  document.getElementById("summary-display").style.display = isSummaryOpen === true ? "flex" : "none";
+  isSummaryOpen === true ? plotSummaryGraph() : cleanSummaryGraph();
 }
 
-function setAccuracyTarget() {
-  accuracyTarget = parseInt(this.value);
+
+
+function plotSummaryGraph() {
+  const SUM_GRAPH = document.getElementById("summary-graph"),
+        SIZE = summary.length < 20 ? summary.length : 20,
+        DATA = summary.slice(0, SIZE),
+        LIMITS = { // LIMITS belongs here to use the prop.[min|max] below!
+          batchSize: [DATA[0].score, null],
+          score: [DATA[0].score, null],
+          iteration: [DATA[0].iteration, null],
+          totalPoints: [DATA[0].totalPoints, null]
+        },
+        RANGE = getSummaryRange(DATA, LIMITS),
+        WIDTH = parseInt(SUM_GRAPH.getAttribute("viewBox").split(" ")[2]),
+        X_STEP = WIDTH/SIZE,
+        HEIGHT = parseInt(SUM_GRAPH.getAttribute("viewBox").split(" ")[3]),
+        Y_STEP = HEIGHT/(RANGE.iteration + 1);
+
+  DATA.map((d, i) => {
+    const NEW_POINT = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
+          F_OBJECT = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject"),
+          POINT_TEXT = document.createElement("pre"),
+          TEXT_CONTENT = document.createTextNode(
+            `Success Rate: ${JSON.stringify(d.score)}
+Batch Size: ${JSON.stringify(d.batchSize)}
+Total Iterations: ${JSON.stringify(d.iteration)}`
+          ),
+          C_X = (WIDTH - (X_STEP * i)) - X_STEP/2,
+          C_Y = (Y_STEP * (d.iteration - LIMITS.iteration[0])) + Y_STEP,
+          L_X = WIDTH - (C_X + 10) >= 200 ? C_X + 10 : C_X - 190,
+          L_Y = HEIGHT - (C_Y - 5) >= 120 ? C_Y - 5 : C_Y - 85;
+    COLOUR = d.iteration >= maxIterations ? COLOURS.errorcol : d.iteration <= 1 ? COLOURS.ctacol : COLOURS.maincol;
+
+    NEW_POINT.setAttribute("id", `sg-circle${i}`);
+    NEW_POINT.setAttribute("cx", C_X);
+    NEW_POINT.setAttribute("cy", C_Y);
+    NEW_POINT.setAttribute("r", 6);
+    NEW_POINT.setAttribute("fill", COLOUR);
+    F_OBJECT.setAttribute("x", L_X);
+    F_OBJECT.setAttribute("y", L_Y);
+    F_OBJECT.appendChild(POINT_TEXT);
+    POINT_TEXT.setAttribute("id", `sg-label${i}`);
+    POINT_TEXT.appendChild(TEXT_CONTENT);
+    NEW_POINT.addEventListener("mouseover", () => togglePointContent(i));
+    NEW_POINT.addEventListener("mouseout", () => togglePointContent(i));
+    SUM_GRAPH.append(NEW_POINT);
+    SUM_GRAPH.append(F_OBJECT);
+  });
 }
 
-function setInterval() {
-  interval = parseInt(this.value);
+function togglePointContent(i) {
+  document.getElementById(`sg-label${i}`).style.display = event.type === "mouseover" ?
+    "block" : "none";
+}
+
+function getSummaryRange(data, limits) {
+  data.map(d => {
+    checkBoundary(d.batchSize, "batchSize", limits);
+    checkBoundary(d.score, "score", limits);
+    checkBoundary(d.iteration, "iteration", limits);
+    checkBoundary(d.totalPoints, "totalPoints", limits);
+  });
+  return {
+    batchSize: limits.batchSize[1] - limits.batchSize[0] < 0 ? 0 : limits.batchSize[1] - limits.batchSize[0],
+    score: limits.score[1] - limits.score[0] < 0 ? 0 : limits.score[1] - limits.score[0],
+    iteration: limits.iteration[1] - limits.iteration[0] < 0 ? 0 : limits.iteration[1] - limits.iteration[0],
+    totalPoints: limits.totalPoints[1] - limits.totalPoints[0] < 0 ? 0 : limits.totalPoints[1] - limits.totalPoints[0]
+  };
+}
+
+function checkBoundary(prop, name, limit) {
+  prop < limit[name][0] ? limit[name][0] = prop :
+  prop > limit[name][1] ? limit[name][1] = prop :
+  "No limit breached.";
+}
+
+function cleanSummaryGraph() {
+  [...document.getElementById("summary-graph").getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
+  [...document.getElementsByTagName("foreignObject")].map(o => o.parentNode.removeChild(o));
+}
+
+
+
+function setVariable(...args) {
+  const NEW_VALUE = parseInt(event.target.value);
+  args.includes("batch") ? batchSize = NEW_VALUE :
+  args.includes("iterations") ? maxIterations = NEW_VALUE :
+  args.includes("accuracy") ? accuracyTarget = NEW_VALUE :
+  args.includes("interval") ? interval = NEW_VALUE :
+  "No variable supplied";
 }
 
 function updateGraphType(e) {
@@ -104,15 +195,16 @@ function renderLine(x1, x2, y1, y2) {
   LINE.setAttribute("x2", x2);
   LINE.setAttribute("y1", y1);
   LINE.setAttribute("y2", y2);
-  LINE.setAttribute("stroke", "green");
+  LINE.setAttribute("stroke", COLOURS.ctacol);
   LINE.classList.add("bisector");
   GRAPH.appendChild(LINE);
 }
 
-// First, we have to generate an array of any length. This will be our data set, so the more data, the more accurate our AI will be. We need to set the elements in this array to equal random co-ordinates, so we can use the function randomNumber to generate these (as well as converting them to fit correctly into the graph) and return to each element an object.
 function cleanPrevData() {
   [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
 }
+
+
 
 function randomNumber(low, high) {
   return Math.random() * (high - low) + low;
@@ -127,7 +219,6 @@ function generateDataRange(limit) {
   return RANGE;
 }
 
-// Could be useful to have the object carry this information inside of it rather than calling it in the case that I need the result.
 function correctAnswer(p) {
   return graphType === "x-is-minus-y" ?
     p.x > p.y ? 1 : -1 :
@@ -138,14 +229,14 @@ function getOffset() {
   return graphType === "x-is-minus-y" ? 0 : GRAPH_X;
 }
 
-// This is where we need to start using our randomWeights that we defined in the runFunction function. This is essentially the AI's initial bias toward something and it is totally random, but by training it with data and incrementing its bias/weight toward a certain result, it can learn and basically script its own algorithm to identify the correct outcome.
-// The first part, takeGuess, will use the given weights (first time is random, after that is is always improving) to determine whether a point ought to be red or blue, which it returns as either 1 or -1. The trainOnce function then compares that to the correct team, and assigns the value of either 0 or -2 to ERROR. When the TRAINED_WEIGHTS object is declared, it adjusts the previous weights accordingly; these will then be passed into the next iteration to be honed further.
 function setLearningRate() {
   const REG = /,\s?/g,
         RATES = document.getElementById("lr-new-rates").value.split(REG),
         STEPS = document.getElementById("lr-new-steps").value.split(REG),
         RATE_ARR = STEPS.map((s, i) => [parseFloat(s), parseFloat(RATES[i])]);
-  learningRate = RATE_ARR;
+  RATES.length === STEPS.length && RATES.length >= 2 ?
+    learningRate = RATE_ARR :
+  alert("Learning rate and steps are not of the same length");
 }
 
 function countSteps() {
@@ -159,13 +250,6 @@ function trainOnce(weights, point, correct) {
   const GUESS = takeGuess(weights, point),
         ERROR = correct - GUESS,
         LEARNING_RATE = countSteps();
-  // LEARNING_RATE = learnRateCount < 2 ?
-  // 0.01 : learnRateCount < 4 ?
-  // 0.001 : learnRateCount < 6 ?
-  // 0.0005 : learnRateCount < 8 ?
-  // 0.0002 : 0.00005,
-  // This declaration keeps the weights the same when they map a point correctly, and alters them slightly when they map badly:
-  // I would love to figure out how to remove the getOffset function. Giving the AI a clear 0 or 800 number depending on its situation feels like cheating but I can't figure out how to balance it to work for both graphs.
   TRAINED_WEIGHTS = {
     x: weights.x + (point.x * ERROR * LEARNING_RATE),
     y: weights.y + (point.y * ERROR * LEARNING_RATE),
@@ -197,13 +281,13 @@ function trainRange(data, weights, getCorrect) {
 
 function renderData(data, weights) {
   data.map(p => {
-    const POINT = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
-          COLOUR = takeGuess(weights, p) === 1 ? "red" : "blue";
-    POINT.setAttribute("cx", p.x);
-    POINT.setAttribute("cy", p.y);
-    POINT.setAttribute("r", 4);
-    POINT.setAttribute("fill", COLOUR);
-    GRAPH.appendChild(POINT);
+    const NEW_POINT = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
+          COLOUR = takeGuess(weights, p) === 1 ? COLOURS.errorcol : COLOURS.maincol;
+    NEW_POINT.setAttribute("cx", p.x);
+    NEW_POINT.setAttribute("cy", p.y);
+    NEW_POINT.setAttribute("r", 4);
+    NEW_POINT.setAttribute("fill", COLOUR);
+    GRAPH.appendChild(NEW_POINT);
   });
 }
 
@@ -214,11 +298,11 @@ function checkSuccess(batchSize) {
       x: parseFloat(c.getAttribute("cx")),
       y: parseFloat(c.getAttribute("cy"))
     };
-    const CORR_COL = correctAnswer(C) === 1 ? "red" : "blue";
+    const CORR_COL = correctAnswer(C) === 1 ? COLOURS.errorcol : COLOURS.maincol;
     return CORR_COL === c.getAttribute("fill");
   });
-  FALSIES = TOF.filter(point => point === false).length;
-  const PERCENT_SUCCESS = 100 - ((FALSIES/batchSize) * 100);
+  const FALSIES = TOF.filter(point => point === false).length,
+        PERCENT_SUCCESS = 100 - ((FALSIES/batchSize) * 100);
   return {
     iteration: iterationCount,
     score: PERCENT_SUCCESS,
@@ -228,25 +312,24 @@ function checkSuccess(batchSize) {
   };
 }
 
-// This function simply logs the results into the summary array, which I will later use to convey the AI's learning curve through another graph.
-function logResults(i) {
-  if (i["score"] >= accuracyTarget && i["iteration"] <= maxIterations + 1) {
-    summary.push(i);
+function logResults(result) {
+  if (result["score"] >= accuracyTarget && result["iteration"] <= maxIterations + 1) {
+    summary.unshift(result);
     resetVars("win");
-    renderLastResult(`Success at ${i["iteration"]} with ${i["fails"]}/${i["batchSize"]} mistakes.`);
+    renderLastResult(`Success at ${result["iteration"]} with ${result["fails"]}/${result["batchSize"]} mistakes.`);
     return;
 
-  } else if (i["iteration"] <= maxIterations) {
+  } else if (result["iteration"] <= maxIterations) {
     setTimeout(runFunction, interval);
 
   } else {
-    summary.push[i];
+    summary.unshift(result);
     resetVars("fail");
-    renderLastResult(`Failure: only ${i["score"].toFixed(2)}% correct.`);
+    renderLastResult(`Failure: only ${result["score"].toFixed(2)}% correct.`);
   }
 }
 
-// Using a separate counter for the iteration and the learning rate allow the AI to continue learning after each function execution (if that is desired). If the same count was used, then on every function loop, the learning rate would reset and throw the previous results off a little (LR should go 0.1 > 0.01 > 0.001 etc but if it reset every time the "run function" button was clicked, it would go through the fine-tuning stages before being subject again to the high learning rate).
+// Using a separate counter for the iteration and the learning rate allows the AI to continue learning after each function execution (if that is desired). If the same count was used, then on every function loop, the learning rate would reset and throw the previous results off a little (LR should go 0.1 > 0.01 > 0.001 and stay low after that but if it reset every time the "run function" button was clicked, it would go through the fine-tuning stages before being subject again to the high learning rate). This way, we can see how the AI behaves after it has a winning solution (sometimes it will guess wildly again but mostly it is pretty accurate after a successful render).
 function resetVars(WL) {
   iterationCount = 0;
   trainedWeights = shouldWeightsReset === true ? randomWeights : trainedWeights;
@@ -257,16 +340,6 @@ function resetVars(WL) {
 
 function renderLastResult(result) {
   document.getElementById("result-display").value = result;
-}
-
-function toggleSummaryDisplay() {
-  isSummaryOpen = !isSummaryOpen;
-  document.getElementById("summary-display").style.display = isSummaryOpen === true ? "flex" : "none";
-}
-
-function toggleHelpDisplay() {
-  isHelpOpen = !isHelpOpen;
-  document.getElementById("help-display").style.display = isHelpOpen === true ? "flex" : "none";
 }
 
 
@@ -289,9 +362,6 @@ function runFunction() {
 
 
 
-// NEXT FEATURE: Design a graph which uses the objects stored in array "summary" and plots them to a graph to visualise the entire process.
-
-
 
 
 [...document.getElementsByClassName("toggle")].map(t => t.addEventListener("click", toggleSwitch));
@@ -299,12 +369,12 @@ function runFunction() {
 [...document.getElementsByClassName("unfinished")].map(b => b.addEventListener("click", () => alert("Pfft, you know how difficult the other graphs were?!")));
 [...document.getElementsByClassName("help-toggle")].map(t => t.addEventListener("click", toggleHelpDisplay));
 [...document.getElementsByClassName("summary-toggle")].map(t => t.addEventListener("click", toggleSummaryDisplay));
-document.getElementById("batch-size").addEventListener("input", setBatchSize);
-document.getElementById("max-iterations").addEventListener("input", setMaxIterations);
+document.getElementById("batch-size").addEventListener("input", () => setVariable("batch"));
+document.getElementById("max-iterations").addEventListener("input", () => setVariable("iterations"));
 document.getElementById("reset-random-weights").addEventListener("click", setRandomWeights);
 document.getElementById("set-learning-rate").addEventListener("click", setLearningRate);
-document.getElementById("accuracy-rate").addEventListener("input", setAccuracyTarget);
-document.getElementById("new-speed").addEventListener("input", setInterval);
+document.getElementById("accuracy-rate").addEventListener("input", () => setVariable("accuracy"));
+document.getElementById("new-speed").addEventListener("input", () => setVariable("interval"));
 document.getElementById("run-function").addEventListener("click", initialiseFunction);
 
 window.addEventListener("keypress", (e) => { if (e.keyCode == 13) { initialiseFunction() }});
