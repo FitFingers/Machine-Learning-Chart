@@ -3,10 +3,10 @@
 
 
   <head>
-    <title>Teach AI To Chart Correctly | JavaScript Machine Learning</title>
+    <title>Train Your Own AI | JavaScript Machine Learning</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <meta name="description" content="Alter the batch size, graph type and learning rate to witness the effect it has on the speed of machine learning.">
+    <meta name="description" content="An interactive machine-learning app: alter the AI's inputs and goals to witness how the machine learns in different scenarios.">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <link rel="icon" href="https://i.ibb.co/tsSSpHy/logo-small-deep-purple-dust.png">
     <link href="machine-learning-chart.css" rel="stylesheet" type="text/css">
@@ -15,9 +15,9 @@
 
 
   <body>
+    <div id="bg"></div>
+
     <div id="app">
-
-
 
       <header>
         <div id="mobile-menu-icon">
@@ -41,22 +41,24 @@
 
       <main id="main-container">
 
-        <div id="summary-display">
+        <section id="summary-display">
           <div id="summary-graph-box">
             <div id="summary-close" class="summary-toggle">
               <i class="fas fa-times-circle clickable"></i>
             </div>
+
             <svg id="summary-graph" viewbox="0 0 700 300"></svg>
+
             <ul>
-              <li><label for="batch-size"><input type="checkbox" for="batch-size" disabled>Batch size</label></li>
-              <li><label for="score"><input type="checkbox" for="score" disabled>Score (%)</label></li>
-              <li><label for="iteration"><input type="checkbox" for="iteration" checked>Iteration</label></li>
-              <li><label for="total-points"><input type="checkbox" for="total-points" checked>Total points</label></li>
+              <li><label for="checkbox-batch-size"><input id="checkbox-batch-size" type="checkbox" name="batch-size" disabled>Batch size</label></li>
+              <li><label for="checkbox-iteration"><input id="checkbox-iteration" type="checkbox" name="iteration" disabled>Iteration</label></li>
+              <li><label for="checkbox-score"><input id="checkbox-score" type="checkbox" name="score" checked>Score (%)</label></li>
+              <li><label for="checkbox-total-points"><input id="checkbox-total-points" type="checkbox" name="total-points" checked>Total points</label></li>
             </ul>
           </div>
-        </div>
+        </section>
 
-        <div id="help-display">
+        <section id="help-display">
           <div id="help-box">
             <div id="help-close" class="help-toggle">
               <i class="fas fa-times-circle clickable"></i>
@@ -66,19 +68,20 @@
               <p>The number of co-ordinates plotted per iteration.</p>
 
               <h4>Max Iterations:</h4>
-              <p>The maximum number of times the AI will run until it gives up.</p>
+              <p>The maximum number of times the AI will run until it returns a fail state.</p>
 
               <h4>Reset:</h4>
-              <p>Regenerate a new set of random weights (biases) to use. Each experiment will begin with the same random weights until you press this button, allowing you to test numerous setups with the same starting point.</p>
+              <p>Regenerate a new set of random weights (biases) to use. Each experiment will begin with the same random weights until you press this button, allowing you to test numerous scenarios with the same starting point.</p>
 
               <h4>Rate:</h4>
-              <p>A comma-separated list to setup your own learning rate. The AI will use these numbers to refine its results (lower is more precise).</p>
+              <p>A comma-separated list to set up your own learning rate. The AI will use these numbers to refine its results;  consider them as degrees of error where lower is more precise.</p>
 
               <h4>Step:</h4>
-              <p>A comma-separated list to setup your own learning rate. These steps dictate after how many (total) iterations the AI will use the following learning rate.</p>
+              <p>A comma-separated list to setup your own learning rate. These steps dictate after how many (total) iterations the AI will use the corresponding learning rate.</p>
 
               <h4>Apply:</h4>
               <p>Submit the Learning Rate inputs.</p>
+              <p><em>Default is [2, 0.01], [4, 0.001], [6, 0.0005], [8, 0.0002], where the integers are steps and the decimals are rates.</em></p>
 
               <h4>Accuracy:</h4>
               <p>The desired success rate. When the AI renders this many or more co-ordinates correctly, the function will end.</p>
@@ -92,22 +95,30 @@
 
               <h4>Point/Batch:</h4>
               <p>Point: The AI will render each co-ordinate one-by-one, so the resulting graph will have some strays.</p>
-              <p>Batch: The AI will train on the entire batch before rendering with its current setup, meaning the bisector is consistently, although that doesn't mean it is correct.</p>
+              <p>Batch: The AI will train on the entire batch before rendering with its current setup, meaning the bisector is consistently true (although that doesn't mean it is correct).</p>
 
               <h4>Graph Types:</h4>
               <p>Choose from these graphs to see how the AI handles different goals.</p>
 
               <h4>Result:</h4>
               <p>The most recent result: displays success after x iterations with y/z mistakes or fail with the percentage of correctly-rendered co-ordinates.</p>
-              
+
               <h4>Result Summary:</h4>
               <p>See your recent results in chart-form here and analyse how each setup affects the AI's abilities.</p>
-              
+
               <h4>Run Function:</h4>
               <p>Run the function with the current setup.</p>
+
+              <div id="setup-example">
+                <h4>Interesting Setups:</h4>
+                <p>Batch: 10;<br />
+                  Max: 100;<br />
+                  Accuracy: 100;</p>
+                <p>This seems to demonstrate well the difference between Forget and Learn: train the AI 5-10 times without Learn set to on - take note of the results. After this, switch Forget to Learn and run another 5-10 times to see the difference (sometimes the initial weights are too close and so the AI can essentially luck out with a correct rendering. If this happens too often, simply use the Reset button to try with new random weights).</p>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
         <div id="settings-box">
           <div id="batch-options" class="option option-box">
@@ -133,7 +144,7 @@
           <div id="speed-options" class="option option-box">
             <h3 class="heading">Animation Speed:</h3>
             <input id="new-speed" class="new-rate input input-style" type="number" placeholder="Frame Duration (ms):"/>
-            <span id="point-iteration-toggle" class="toggle settings-span clickable">Point</span>
+            <span id="batch-iteration-toggle" class="toggle settings-span clickable">Batch</span>
           </div>
 
           <div id="graph-options" class="option option-box">
