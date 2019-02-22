@@ -1,3 +1,4 @@
+// GLOBAL VARIABLES
 const GRAPH = document.getElementById("main-graph"),
       GRAPH_X = 600,
       GRAPH_Y = 600,
@@ -26,6 +27,8 @@ let randomWeights = generateRandomWeights(),
 
 
 
+
+// VARIABLE-SETUP AND COSMETIC FUNCTIONS
 function generateRandomWeights() {
   return ({
     x: randomNumber(-1, 1),
@@ -38,9 +41,49 @@ function setRandomWeights() {
   randomWeights = generateRandomWeights();
 }
 
+function setVariable(...args) {
+  const NEW_VALUE = parseInt(event.target.value);
+  args.includes("batch") ? batchSize = NEW_VALUE :
+  args.includes("iterations") ? maxIterations = NEW_VALUE :
+  args.includes("accuracy") ? accuracyTarget = NEW_VALUE :
+  args.includes("interval") ? interval = NEW_VALUE :
+  "No variable supplied";
+}
+
 function setGraphSize() {
   GRAPH.style.width = "100%";
   GRAPH.style.height = document.getElementById("graph-box").offsetWidth;
+}
+
+function updateGraphType(e) {
+  graphType = e.target.id;
+  resetVars();
+  plotLine(graphType);
+}
+
+function plotLine(type) {
+  [...GRAPH.getElementsByClassName("bisector")].map(l => l.parentNode.removeChild(l));
+  type === "x-is-minus-y" ?
+    renderLine(10, GRAPH_X-10, 10, GRAPH_Y-10) :
+  type === "x-is-y" ?
+    renderLine(10, GRAPH_X-10, GRAPH_Y-10, 10) :
+  type === "x-is-y-sq" ?
+    console.log("'x = y²' is coming soon") : console.log("'y = x²' is coming soon");
+}
+
+function renderLine(x1, x2, y1, y2) {
+  const LINE = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  LINE.setAttribute("x1", x1);
+  LINE.setAttribute("x2", x2);
+  LINE.setAttribute("y1", y1);
+  LINE.setAttribute("y2", y2);
+  LINE.setAttribute("stroke", COLOURS.ctacol);
+  LINE.classList.add("bisector");
+  GRAPH.appendChild(LINE);
+}
+
+function cleanMainGraph() {
+  [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
 }
 
 function toggleSwitch() {
@@ -82,6 +125,8 @@ function toggleSummaryDisplay() {
 
 
 
+
+// SUMMARY GRAPH FUNCTIONS
 function plotSummaryGraph() {
   const SUM_GRAPH = document.getElementById("summary-graph"),
         SIZE = summary.length < 20 ? summary.length : 20,
@@ -163,48 +208,8 @@ function cleanSummaryGraph() {
 
 
 
-function setVariable(...args) {
-  const NEW_VALUE = parseInt(event.target.value);
-  args.includes("batch") ? batchSize = NEW_VALUE :
-  args.includes("iterations") ? maxIterations = NEW_VALUE :
-  args.includes("accuracy") ? accuracyTarget = NEW_VALUE :
-  args.includes("interval") ? interval = NEW_VALUE :
-  "No variable supplied";
-}
 
-function updateGraphType(e) {
-  graphType = e.target.id;
-  resetVars();
-  plotLine(graphType);
-}
-
-function plotLine(type) {
-  [...GRAPH.getElementsByClassName("bisector")].map(l => l.parentNode.removeChild(l));
-  type === "x-is-minus-y" ?
-    renderLine(10, GRAPH_X-10, 10, GRAPH_Y-10) :
-  type === "x-is-y" ?
-    renderLine(10, GRAPH_X-10, GRAPH_Y-10, 10) :
-  type === "x-is-y-sq" ?
-    console.log("'x = y²' is coming soon") : console.log("'y = x²' is coming soon");
-}
-
-function renderLine(x1, x2, y1, y2) {
-  const LINE = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  LINE.setAttribute("x1", x1);
-  LINE.setAttribute("x2", x2);
-  LINE.setAttribute("y1", y1);
-  LINE.setAttribute("y2", y2);
-  LINE.setAttribute("stroke", COLOURS.ctacol);
-  LINE.classList.add("bisector");
-  GRAPH.appendChild(LINE);
-}
-
-function cleanPrevData() {
-  [...document.getElementsByTagName("circle")].map(c => c.parentNode.removeChild(c));
-}
-
-
-
+// AI FUNCTIONS
 function randomNumber(low, high) {
   return Math.random() * (high - low) + low;
 }
@@ -342,16 +347,15 @@ function renderLastResult(result) {
   document.getElementById("result-display").value = result;
 }
 
-
 function initialiseFunction() {
-  cleanPrevData();
+  cleanMainGraph();
   const DATA = generateDataRange(batchSize);
   renderData(DATA, randomWeights);
   runFunction();
 }
 
 function runFunction() {
-  cleanPrevData();
+  cleanMainGraph();
   const DATA = generateDataRange(batchSize);
   trainRange(DATA, trainedWeights, correctAnswer, renderData);
   iterationCount++;
@@ -363,21 +367,34 @@ function runFunction() {
 
 
 
+// EVENT LISTENERS
+Object.prototype.addMultipleListeners = function (listeners, func) {
+  listeners.map(L => {
+    this.addEventListener(L[0], func);
+    if (L.includes("keypress")) {
+      this.addEventListener(L[0], () => { 
+      if (event.keyCode === L[1]) {
+        func;
+      }})
+    }
+  });
+};
 
-[...document.getElementsByClassName("toggle")].map(t => t.addEventListener("click", toggleSwitch));
-[...document.getElementsByClassName("graph-button")].map(b => b.addEventListener("click", updateGraphType));
-[...document.getElementsByClassName("unfinished")].map(b => b.addEventListener("click", () => alert("Pfft, you know how difficult the other graphs were?!")));
-[...document.getElementsByClassName("help-toggle")].map(t => t.addEventListener("click", toggleHelpDisplay));
-[...document.getElementsByClassName("summary-toggle")].map(t => t.addEventListener("click", toggleSummaryDisplay));
+[...document.getElementsByClassName("toggle")].map(t => t.addMultipleListeners([["click"], ["keypress", 13]], toggleSwitch));
+[...document.getElementsByClassName("graph-button")].map(b => b.addMultipleListeners([["click"], ["keypress", 13]], updateGraphType));
+[...document.getElementsByClassName("unfinished")].map(b => b.addMultipleListeners([["click"], ["keypress", 13]], () => alert("Pfft, you know how difficult the other graphs were?!")));
+[...document.getElementsByClassName("help-toggle")].map(t => t.addMultipleListeners([["click"], ["keypress", 13]], toggleHelpDisplay));
+[...document.getElementsByClassName("summary-toggle")].map(t => t.addMultipleListeners([["click"], ["keypress", 13]], toggleSummaryDisplay));
+
 document.getElementById("batch-size").addEventListener("input", () => setVariable("batch"));
 document.getElementById("max-iterations").addEventListener("input", () => setVariable("iterations"));
-document.getElementById("reset-random-weights").addEventListener("click", setRandomWeights);
-document.getElementById("set-learning-rate").addEventListener("click", setLearningRate);
+document.getElementById("reset-random-weights").addMultipleListeners([["click"], ["keypress", 13]], setRandomWeights);
+document.getElementById("set-learning-rate").addMultipleListeners([["click"], ["keypress", 13]], setLearningRate);
 document.getElementById("accuracy-rate").addEventListener("input", () => setVariable("accuracy"));
 document.getElementById("new-speed").addEventListener("input", () => setVariable("interval"));
 document.getElementById("run-function").addEventListener("click", initialiseFunction);
 
-window.addEventListener("keypress", (e) => { if (e.keyCode == 13) { initialiseFunction() }});
+window.addEventListener("keypress", (e) => { if (e.keyCode == 32) { initialiseFunction() }});
 window.onresize = () => setGraphSize();
 window.onload = () => {
   plotLine(graphType);
