@@ -5,8 +5,7 @@ const GRAPH = document.getElementById("main-graph"),
         maincol: "#5D737E",
         buttcol: "#3F4045",
         ctacol: "#008000",
-        errorcol: "#DD7373",
-        // errorcol: "#FE5F55"
+        errorcol: "#C96969",
       }
 
 let randomWeights = generateRandomWeights(),
@@ -97,7 +96,7 @@ function plotSummaryGraph() {
         WIDTH = parseInt(SUM_GRAPH.getAttribute("viewBox").split(" ")[2]),
         X_STEP = WIDTH/SIZE,
         HEIGHT = parseInt(SUM_GRAPH.getAttribute("viewBox").split(" ")[3]),
-        Y_STEP = HEIGHT/(RANGE.iteration + 1);
+        Y_STEP = HEIGHT/(RANGE.iteration);
 
   DATA.map((d, i) => {
     const NEW_POINT = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
@@ -109,10 +108,10 @@ Batch Size: ${JSON.stringify(d.batchSize)}
 Total Iterations: ${JSON.stringify(d.iteration)}`
           ),
           C_X = (WIDTH - (X_STEP * i)) - X_STEP/2,
-          C_Y = (Y_STEP * (d.iteration - LIMITS.iteration[0])) + Y_STEP,
-          L_X = WIDTH - (C_X + 10) >= 200 ? C_X + 10 : C_X - 190,
-          L_Y = HEIGHT - (C_Y - 5) >= 120 ? C_Y - 5 : C_Y - 85;
-    COLOUR = d.iteration >= maxIterations ? COLOURS.errorcol : d.iteration <= 1 ? COLOURS.ctacol : COLOURS.maincol;
+          C_Y = (0.9 * (Y_STEP * (d.iteration - LIMITS.iteration[0])) + (HEIGHT * 0.05)),
+          L_X = WIDTH - (C_X + 10) >= 200 ? C_X + 10 : C_X - 200,
+          L_Y = HEIGHT - (C_Y - 5) >= 120 ? C_Y - 5 : C_Y - 85,
+          COLOUR = d.iteration >= maxIterations ? COLOURS.errorcol : d.iteration <= 1 ? COLOURS.ctacol : COLOURS.maincol;
 
     NEW_POINT.setAttribute("id", `sg-circle${i}`);
     NEW_POINT.setAttribute("cx", C_X);
@@ -234,9 +233,10 @@ function setLearningRate() {
         RATES = document.getElementById("lr-new-rates").value.split(REG),
         STEPS = document.getElementById("lr-new-steps").value.split(REG),
         RATE_ARR = STEPS.map((s, i) => [parseFloat(s), parseFloat(RATES[i])]);
-  RATES.length === STEPS.length && RATES.length >= 2 ?
-    learningRate = RATE_ARR :
-  alert("Learning rate and steps are not of the same length");
+  RATES.length !== STEPS.length ?
+    alert("Learning rate and steps are not of the same length") :
+  RATES.length < 2 ? alert("Learning rate must have more than one entry") :
+  learningRate = RATE_ARR;
 }
 
 function countSteps() {
@@ -319,7 +319,7 @@ function logResults(result) {
     renderLastResult(`Success at ${result["iteration"]} with ${result["fails"]}/${result["batchSize"]} mistakes.`);
     return;
 
-  } else if (result["iteration"] <= maxIterations) {
+  } else if (result["iteration"] < maxIterations) {
     setTimeout(runFunction, interval);
 
   } else {
