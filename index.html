@@ -41,29 +41,12 @@
 
       <main id="main-container">
 
-        <section id="summary-display">
-          <div id="summary-graph-box">
-            <div id="summary-close" class="summary-toggle" tabindex="0">
-              <i class="fas fa-times-circle clickable"></i>
-            </div>
-
-            <svg id="summary-graph" viewbox="0 0 700 300"></svg>
-
-            <ul>
-              <li><label for="checkbox-batch-size"><input id="checkbox-batch-size" type="checkbox" name="batch-size" disabled>Batch size</label></li>
-              <li><label for="checkbox-total-points"><input id="checkbox-total-points" type="checkbox" name="total-points" disabled>Total points</label></li>
-              <li><label for="checkbox-score"><input id="checkbox-score" type="checkbox" name="score" disabled checked>Score (%)</label></li>
-              <li><label for="checkbox-iteration"><input id="checkbox-iteration" type="checkbox" name="iteration" disabled checked>Iteration</label></li>
-            </ul>
-          </div>
-        </section>
-
         <section id="help-display">
           <div id="help-box">
             <div id="help-close" class="help-toggle" tabindex="0">
               <i class="fas fa-times-circle clickable"></i>
             </div>
-            <div id="help-text">
+            <div id="help-text" tabindex="0">
               <h4>Batch Size:</h4>
               <p>The number of co-ordinates plotted per iteration.</p>
 
@@ -158,7 +141,25 @@
           <div id="results-box" class="option option-box">
             <h3 class="heading">Result:</h3>
             <input id="result-display" class="input input-style" placeholder="Pending..."/>
+            
             <i id="show-summary-button" class="clickable icon summary-toggle far fa-chart-bar" tabindex="0"></i>
+
+            <section id="summary-display">
+              <div id="summary-graph-box">
+                <div id="summary-close" class="summary-toggle" tabindex="0">
+                  <i class="fas fa-times-circle clickable"></i>
+                </div>
+
+                <svg id="summary-graph" viewbox="0 0 700 300"></svg>
+
+                <ul>
+                  <li><label for="checkbox-batch-size"><input id="checkbox-batch-size" type="checkbox" name="batch-size" disabled>Batch size</label></li>
+                  <li><label for="checkbox-total-points"><input id="checkbox-total-points" type="checkbox" name="total-points" disabled>Total points</label></li>
+                  <li><label for="checkbox-score"><input id="checkbox-score" type="checkbox" name="score" disabled checked>Score (%)</label></li>
+                  <li><label for="checkbox-iteration"><input id="checkbox-iteration" type="checkbox" name="iteration" disabled checked>Iteration</label></li>
+                </ul>
+              </div>
+            </section>
           </div>
 
           <button id="run-function" class="button-style clickable">Run Function</button>
