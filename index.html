@@ -33,7 +33,7 @@
           <a href="https://fitfingers.github.io/" target="_blank">
             <div id="james-hooper-logo"></div>
           </a>
-          <i id="help-button" class="fas fa-question-circle clickable help-toggle"></i>
+          <i id="help-button" class="fas fa-question-circle clickable help-toggle" tabindex="0"></i>
         </div>
       </header>
 
@@ -43,7 +43,7 @@
 
         <section id="summary-display">
           <div id="summary-graph-box">
-            <div id="summary-close" class="summary-toggle">
+            <div id="summary-close" class="summary-toggle" tabindex="0">
               <i class="fas fa-times-circle clickable"></i>
             </div>
 
@@ -51,16 +51,16 @@
 
             <ul>
               <li><label for="checkbox-batch-size"><input id="checkbox-batch-size" type="checkbox" name="batch-size" disabled>Batch size</label></li>
-              <li><label for="checkbox-iteration"><input id="checkbox-iteration" type="checkbox" name="iteration" disabled>Iteration</label></li>
-              <li><label for="checkbox-score"><input id="checkbox-score" type="checkbox" name="score" checked>Score (%)</label></li>
-              <li><label for="checkbox-total-points"><input id="checkbox-total-points" type="checkbox" name="total-points" checked>Total points</label></li>
+              <li><label for="checkbox-total-points"><input id="checkbox-total-points" type="checkbox" name="total-points" disabled>Total points</label></li>
+              <li><label for="checkbox-score"><input id="checkbox-score" type="checkbox" name="score" disabled checked>Score (%)</label></li>
+              <li><label for="checkbox-iteration"><input id="checkbox-iteration" type="checkbox" name="iteration" disabled checked>Iteration</label></li>
             </ul>
           </div>
         </section>
 
         <section id="help-display">
           <div id="help-box">
-            <div id="help-close" class="help-toggle">
+            <div id="help-close" class="help-toggle" tabindex="0">
               <i class="fas fa-times-circle clickable"></i>
             </div>
             <div id="help-text">
@@ -125,26 +125,26 @@
             <h3 class="heading">Data:</h3>
             <input id="batch-size" class="input input-style batch" type="number" placeholder="Batch size:" />
             <input id="max-iterations" class="input input-style iteration" type="number" placeholder="Max iterations:" />
-            <span id="reset-random-weights" class="reset-rate settings-span clickable">Reset</span>
+            <span id="reset-random-weights" class="reset-rate settings-span clickable" tabindex="0">Reset</span>
           </div>
 
           <div id="learning-rate-options" class="option option-box">
             <h3 class="heading">Learning Rate:</h3>
             <input id="lr-new-rates" class="new-rate input input-style" type="text" placeholder="Rate: 1, 0.1..." />
             <input id="lr-new-steps" class="new-step input input-style" type="text" placeholder="Step: 2, 4, 6..." />
-            <span id="set-learning-rate" class="set-rate settings-span clickable">Apply</span>
+            <span id="set-learning-rate" class="set-rate settings-span clickable" tabindex="0">Apply</span>
           </div>
 
           <div id="loop-end-options" class="option option-box">
             <h3 class="heading">Loop End:</h3>
             <input id="accuracy-rate" class="new-rate input input-style" type="number" placeholder="Desired accuracy (in %):" />
-            <span id="weight-reset-toggle" class="toggle settings-span clickable">Forget</span>
+            <span id="weight-reset-toggle" class="toggle settings-span clickable" tabindex="0">Forget</span>
           </div>
 
           <div id="speed-options" class="option option-box">
             <h3 class="heading">Animation Speed:</h3>
             <input id="new-speed" class="new-rate input input-style" type="number" placeholder="Frame Duration (ms):"/>
-            <span id="batch-iteration-toggle" class="toggle settings-span clickable">Batch</span>
+            <span id="batch-iteration-toggle" class="toggle settings-span clickable" tabindex="0">Batch</span>
           </div>
 
           <div id="graph-options" class="option option-box">
@@ -158,12 +158,12 @@
           <div id="results-box" class="option option-box">
             <h3 class="heading">Result:</h3>
             <input id="result-display" class="input input-style" placeholder="Pending..."/>
-            <i id="show-summary-button" class="clickable icon summary-toggle far fa-chart-bar"></i>
+            <i id="show-summary-button" class="clickable icon summary-toggle far fa-chart-bar" tabindex="0"></i>
           </div>
 
           <button id="run-function" class="button-style clickable">Run Function</button>
 
-          <span id="hint">HINT: App runs on "enter".</span>
+          <span id="hint">HINT: Run app by pressing "space".</span>
         </div>
 
 
