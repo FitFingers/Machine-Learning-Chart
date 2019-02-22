@@ -38,7 +38,7 @@ body {
   margin: 0;
 }
 body #bg {
-  background-image: url(https://i.ibb.co/gyMV00H/hexagon-honeycomb-tessellation-coloring-pages-1.png);
+  background-image: url(https://i.ibb.co/09vBq9d/hexagon-honeycomb-tessellation-coloring-pages-1-1.png);
   background-size: contain;
   filter: invert(1);
   opacity: 0.02;
@@ -138,9 +138,6 @@ body #summary-display #summary-graph-box #summary-graph {
 body #summary-display #summary-graph-box #summary-graph circle {
   cursor: pointer;
 }
-body #summary-display #summary-graph-box #summary-graph line {
-  fill: #3F4045;
-}
 body #summary-display #summary-graph-box #summary-graph pre {
   border-radius: 5px;
   box-shadow: 0 0 8px 1px rgba(0, 0, 0, 0.35);
@@ -151,7 +148,7 @@ body #summary-display #summary-graph-box #summary-graph pre {
   height: min-content;
   font-size: 14px;
   color: #FCFCFC;
-  z-index: 1;
+  z-index: 10;
 }
 body #summary-display #summary-graph-box ul {
   display: block;
@@ -369,5 +366,5 @@ body #graph-box #main-graph {
   width: 600px;
 }
 body #graph-box .bisector {
-  opacity: 0.2;
+  opacity: 0.3;
 }
