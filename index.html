@@ -20,10 +20,6 @@
     <div id="app">
 
       <header>
-        <div id="mobile-menu-icon">
-          <i class="fas fa-sliders-h"></i>
-        </div>
-
         <div id="title">
           <h1>JavaScript Machine Learning</h1>
           <h2>Alter the batch size, graph type and learning rate to witness the effect it has on the speed of machine learning.</h2>
@@ -104,33 +100,33 @@
         </section>
 
         <div id="settings-box">
-          <div id="batch-options" class="option option-box">
+          <div id="batch-options" class="option option-box mobile-hidden-option">
             <h3 class="heading">Data:</h3>
             <input id="batch-size" class="input input-style batch" type="number" placeholder="Batch size:" />
             <input id="max-iterations" class="input input-style iteration" type="number" placeholder="Max iterations:" />
             <span id="reset-random-weights" class="reset-rate settings-span clickable" tabindex="0">Reset</span>
           </div>
 
-          <div id="learning-rate-options" class="option option-box">
+          <div id="learning-rate-options" class="option option-box mobile-hidden-option">
             <h3 class="heading">Learning Rate:</h3>
             <input id="lr-new-rates" class="new-rate input input-style" type="text" placeholder="Rate: 1, 0.1..." />
             <input id="lr-new-steps" class="new-step input input-style" type="text" placeholder="Step: 2, 4, 6..." />
             <span id="set-learning-rate" class="set-rate settings-span clickable" tabindex="0">Apply</span>
           </div>
 
-          <div id="loop-end-options" class="option option-box">
+          <div id="loop-end-options" class="option option-box mobile-hidden-option">
             <h3 class="heading">Loop End:</h3>
             <input id="accuracy-rate" class="new-rate input input-style" type="number" placeholder="Desired accuracy (in %):" />
             <span id="weight-reset-toggle" class="toggle settings-span clickable" tabindex="0">Forget</span>
           </div>
 
-          <div id="speed-options" class="option option-box">
+          <div id="speed-options" class="option option-box mobile-hidden-option">
             <h3 class="heading">Animation Speed:</h3>
             <input id="new-speed" class="new-rate input input-style" type="number" placeholder="Frame Duration (ms):"/>
             <span id="batch-iteration-toggle" class="toggle settings-span clickable" tabindex="0">Batch</span>
           </div>
 
-          <div id="graph-options" class="option option-box">
+          <div id="graph-options" class="option option-box mobile-hidden-option">
             <h3 id="graph-option-heading">Graph Types:</h3>
             <button id="x-is-y" class="graph-button button-style clickable">x = y</button>
             <button id="x-is-minus-y" class="graph-button button-style clickable">x = y*-1</button>
@@ -139,9 +135,9 @@
           </div>
 
           <div id="results-box" class="option option-box">
-            <h3 class="heading">Result:</h3>
+            <h3 id="results-heading" class="heading">Result:</h3>
             <input id="result-display" class="input input-style" placeholder="Pending..."/>
-            
+
             <i id="show-summary-button" class="clickable icon summary-toggle far fa-chart-bar" tabindex="0"></i>
 
             <section id="summary-display">
@@ -162,9 +158,15 @@
             </section>
           </div>
 
-          <button id="run-function" class="button-style clickable">Run Function</button>
+          <div id="run-function-box">
+            <button id="run-function" class="run-func-button button-style clickable">Run Function</button>
+            <div id="mobile-menu-icon" class="clickable">
+              <i class="fas fa-sliders-h"></i>
+            </div>
 
-          <span id="hint">HINT: Run app by pressing "space".</span>
+            <span id="hint">HINT: Run app by pressing "space".</span>
+          </div>
+
         </div>
 
 
