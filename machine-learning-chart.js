@@ -21,6 +21,7 @@ let randomWeights = generateRandomWeights(),
     interval = 0,
     shouldRenderAfterPoint = false,
     graphType = "x-is-y",
+    isMobileMenuOpen = false;
     isHelpOpen = false,
     isSummaryOpen = false,
     summary = [];
@@ -106,7 +107,6 @@ function handleToggleChange(e, isToggleOn) {
     }
   }
   document.getElementById(e).innerHTML = TEXT_VALUES[e][isToggleOn];
-
   e === "weight-reset-toggle" ?
     shouldWeightsReset = !shouldWeightsReset :
   shouldRenderAfterPoint = !shouldRenderAfterPoint;
@@ -121,6 +121,12 @@ function toggleSummaryDisplay() {
   isSummaryOpen = !isSummaryOpen;
   document.getElementById("summary-display").style.display = isSummaryOpen === true ? "flex" : "none";
   isSummaryOpen === true ? plotSummaryGraph() : cleanSummaryGraph();
+}
+
+function toggleMobileMenu() {
+  isMobileMenuOpen = !isMobileMenuOpen;
+  const DISPLAY = isMobileMenuOpen === true ? "grid" : "none";
+  [...document.getElementsByClassName("mobile-hidden-option")].map(o => o.style.display = DISPLAY);
 }
 
 
@@ -386,6 +392,7 @@ Object.prototype.addMultipleListeners = function (listeners, func) {
 [...document.getElementsByClassName("help-toggle")].map(t => t.addMultipleListeners([["click"], ["keypress", 13]], toggleHelpDisplay));
 [...document.getElementsByClassName("summary-toggle")].map(t => t.addMultipleListeners([["click"], ["keypress", 13]], toggleSummaryDisplay));
 
+document.getElementById("mobile-menu-icon").addEventListener("click", toggleMobileMenu);
 document.getElementById("batch-size").addEventListener("input", () => setVariable("batch"));
 document.getElementById("max-iterations").addEventListener("input", () => setVariable("iterations"));
 document.getElementById("reset-random-weights").addMultipleListeners([["click"], ["keypress", 13]], setRandomWeights);
